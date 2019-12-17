@@ -94,7 +94,7 @@ namespace Task1
                             isNumber = float.TryParse(Console.ReadLine(), out number);
                             if (isNumber)
                             {
-                                Console.WriteLine($"Number Deposited is $ {bank.Deposit((float)Math.Truncate((number * 100)) / 100, account.Username)}");
+                                Console.WriteLine($"Number Deposited is $ {bank.Deposit(bank.NumberTrancate(number), account.Username)}");
                                 Console.WriteLine($"Your Balance is $ {bank.ShowBalance(account.Username)}");
                                 Console.ReadKey();
                             }
@@ -118,8 +118,8 @@ namespace Task1
                                 }
                                 else
                                 {
-                                    bank.Withdrawal((float)Math.Truncate(number * 100) / 100, account.Username);
-                                    Console.WriteLine($"You Withrawed $ {number}");
+                                    bank.Withdrawal(bank.NumberTrancate(number), account.Username);
+                                    Console.WriteLine($"You Withrawed $ {bank.NumberTrancate(number)}");
                                     Console.WriteLine($"Your Balance now is $ {bank.ShowBalance(account.Username)}");
                                     Console.WriteLine("Press Any Key to Continue");
                                     Console.ReadKey();
@@ -162,8 +162,8 @@ namespace Task1
                                     }
                                     else
                                     {
-                                        var moneyBalanceAfterTransfered = bank.TransferalOfMoneyReciever(reciever, number);
-                                        var moneyBalanceAfterTransfered2 = bank.TransferalOfMoneySender(account.Username, number);
+                                        var moneyBalanceAfterTransfered = bank.TransferalOfMoneyReciever(reciever, bank.NumberTrancate(number));
+                                        var moneyBalanceAfterTransfered2 = bank.TransferalOfMoneySender(account.Username, bank.NumberTrancate(number));
                                         Console.WriteLine("Money Successfully Sent");
                                         Console.WriteLine($"Your Balance now is $ {bank.ShowBalance(account.Username)}");
                                         Console.WriteLine("Press Any Key to Continue");

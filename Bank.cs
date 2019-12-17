@@ -153,4 +153,9 @@ class Bank
         
         return password;
     }
+
+    public float NumberTrancate(float number)
+    {
+        return (float)Math.Truncate((number * 100)) / 100;
+    }
 }
