@@ -4,15 +4,12 @@ namespace Task1
 {
     class Program
     {
+        static Bank bank = new Bank("Borats Bank");
         static void Main(string[] args)
         {
-            Person[] p = new Person[1000];
             bool shouldContinue = true;
-
-            for (int x = 0; x < p.Length; x++)
-            {
-                p[x] = new Person();
-            }
+            string username = string.Empty;
+            string password = string.Empty;
 
             while (shouldContinue)
             {
@@ -22,21 +19,39 @@ namespace Task1
                 Console.WriteLine("Press 2 For Register");
                 Console.WriteLine("Press 3 For Exit");
                 Console.WriteLine("Enter Choice:");
-                string choice = Console.ReadLine();
 
-                switch (choice)
+                switch (Console.ReadLine())
                 {
                     case "1":
-                        Login(p);
+                        Console.Clear();
+                        Console.WriteLine("Log in using your Borat Account");
+                        Console.WriteLine("Enter username:");
+                        username = Console.ReadLine();
+                        Console.WriteLine("Enter password:");
+                        password = "";              
+                        var passwordMasked = bank.PasswordMasking(password);
+                        var account = bank.Login(username, passwordMasked);
+                        UserLoginMainMenu(account);
                         break;
 
                     case "2":
                         Console.Clear();
-                        Register(p);
+                        Console.WriteLine("Registration of Account");
+                        Console.WriteLine("Enter username:");
+                        username = Console.ReadLine();
+                        Console.WriteLine("Enter password:");
+                        password = Console.ReadLine();
+                        var id = bank.Register(username, password);
+                        Console.WriteLine("Congratulations you have successfully registered.");
+                        Console.WriteLine($"Here is your Account Id. {id}");
+                        Console.WriteLine("Press Any Key to Continue.");
+                        Console.ReadKey();
                         break;
 
                     case "3":
                         Console.WriteLine("Thank you for Using Borats Online Bank Application.");
+                        Console.WriteLine("Press Any Key to Continue.");
+                        Console.Beep();
                         Console.ReadKey();
                         shouldContinue = false;
                         break;
@@ -49,201 +64,145 @@ namespace Task1
             }
         }
 
-        static int index = -1;
-        public static Person Register(Person[] p)
+        public static void UserLoginMainMenu(Account account)
         {
-            index++;
-            Random random = new Random();
-            int accountId = 0;
+            float number;
+            bool isNumber;
+            bool shouldContinue = true;
 
-            //Unique AccountId Validation
-            for (int x = 0; x < p.Length; x++)
+            while (shouldContinue)
             {
-                accountId = random.Next(10000); //35
-
-                if (accountId != p[x].AccountId) // 35 != 35
+                if (account != null)
                 {
-                    p[index].AccountId = accountId;
-                    break;
-                }
-            }          
-
-            Console.WriteLine($"Register for account number : {accountId}");
-            Console.WriteLine("Enter username:");
-            string username = Console.ReadLine();
-            p[index].Username = username;
-            Console.WriteLine("Enter password:");
-            string password = Console.ReadLine();
-            p[index].Password = password;
-            Console.WriteLine("Account Successfully Registered. Back to the Main Menu");
-            Console.ReadKey();
-            return p[index];
-        }
-
-        public static void Login(Person[] p)
-        {
-            
-            Console.WriteLine("Log in using your Borat Account");
-            Console.WriteLine("Enter username:");
-            string usernameLogin = Console.ReadLine();
-
-            Console.WriteLine("Enter password:");
-            string passwordLogin = Console.ReadLine();
-            bool notFound = false;
-            
-            for(int x = 0; x <= index; x++)
-            {                       
-                if (p[x].Username == usernameLogin && p[x].Password == passwordLogin)
-                {                       
-                    bool shouldContinue = true;                    
-                    while (shouldContinue)
+                    Console.Clear();
+                    Console.WriteLine("Account Successfully Logged In");
+                    Console.WriteLine($"Welcome back, {account.Username}");
+                    Console.WriteLine($"Account Id: {account.AccountId}");
+                    Console.WriteLine("Enter Login Option:");
+                    Console.WriteLine("1.] Deposit");
+                    Console.WriteLine("2.] Withdraw");
+                    Console.WriteLine("3.] Check Balance");
+                    Console.WriteLine("4.] Send Money");
+                    Console.WriteLine("5.] Log out");
+                    Console.WriteLine("Enter Option:");
+                    string loginOption = Console.ReadLine();
+                    switch (loginOption)
                     {
-                        Console.Clear();
-                        Console.WriteLine($"Account Id : {p[x].AccountId}");
-                        Console.WriteLine($"Account Name : {p[x].Username}");                                                   
-                        Console.WriteLine("Account Successfully Logged In");                           
-                        Console.WriteLine("Enter Login Option:");
-                        Console.WriteLine("1.] Deposit");
-                        Console.WriteLine("2.] Withdraw");
-                        Console.WriteLine("3.] Check Balance");
-                        Console.WriteLine("4.] Send Money");
-                        Console.WriteLine("5.] Log out");                
-                        Console.WriteLine("Enter Option:");
-                        string loginOption = Console.ReadLine();
-                        switch (loginOption)
-                        {
-                            case "1":
-                                Console.WriteLine($"Account Id : {p[x].AccountId}");                           
-                                Console.WriteLine($"Enter the amount you want to Deposit:");
-                                bool depositNumberChecker = float.TryParse(Console.ReadLine(), out float number);
-                                if (depositNumberChecker)
-                                {     
-                                    Console.WriteLine($"Number Deposited is $ {p[x].Deposit(Math.Truncate((number * 100)) / 100)}" );
-                                    Console.WriteLine($"Your Balance is $ {p[x].Balance}");
+                        case "1":
+                            Console.WriteLine($"Account Id : {account.AccountId}");
+                            Console.WriteLine($"Enter the amount you want to Deposit:");
+                            isNumber = float.TryParse(Console.ReadLine(), out number);
+                            if (isNumber)
+                            {
+                                Console.WriteLine($"Number Deposited is $ {bank.Deposit((float)Math.Truncate((number * 100)) / 100, account.Username)}");
+                                Console.WriteLine($"Your Balance is $ {bank.ShowBalance(account.Username)}");
+                                Console.ReadKey();
+                            }
+                            else
+                            {
+                                TryParseNumberValidation();
+                                continue;
+                            }
+                            break;
+
+                        case "2":
+                            Console.WriteLine($"Account Id : {account.AccountId}");
+                            Console.WriteLine($"Enter Withdrawal amount:");
+                            isNumber = float.TryParse(Console.ReadLine(), out number);
+                            if (isNumber)
+                            {
+                                if (number > bank.ShowBalance(account.Username))
+                                {
+                                    Console.WriteLine("You cannot withdraw less the amount of your balance");
                                     Console.ReadKey();
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Please Input numbers");
+                                    bank.Withdrawal((float)Math.Truncate(number * 100) / 100, account.Username);
+                                    Console.WriteLine($"You Withrawed $ {number}");
+                                    Console.WriteLine($"Your Balance now is $ {bank.ShowBalance(account.Username)}");
                                     Console.WriteLine("Press Any Key to Continue");
                                     Console.ReadKey();
-                                    continue;
                                 }
-                                break;
+                            }
+                            else
+                            {
+                                TryParseNumberValidation();
+                            }
+                            break;
 
-                            case "2":
-                                Console.WriteLine($"Account Id : {p[x].AccountId}");                                
-                                Console.WriteLine($"Enter Withdrawal amount:");
-                                bool withdrawalNumberChecker = float.TryParse(Console.ReadLine(), out float number2);
-                                if (withdrawalNumberChecker)
+                        case "3":
+                            Console.WriteLine($"Your Balance is $ {bank.ShowBalance(account.Username)}");
+                            Console.WriteLine("Press Any Key to Continue");
+                            Console.ReadKey();
+                            break;
+
+                        case "4":
+                            Console.WriteLine("Please Input the Name of the reciever");
+                            string reciever = Console.ReadLine();
+                            var recieverFound = bank.SearchReciever(reciever);
+                            if (recieverFound == null)
+                            {
+                                Console.WriteLine("Account not Found");
+                                Console.WriteLine("Press Any Key to Continue");
+                                Console.ReadLine();
+                            }
+                            else
+                            {
+                                Console.WriteLine("Enter Amount of Money You want to Send:");
+                                isNumber = float.TryParse(Console.ReadLine(), out number);
+                                if (isNumber)
                                 {
-                                    if(number2 > p[x].Balance)
+                                    if (account.Balance < number)
                                     {
-                                        Console.WriteLine("You cannot withdraw less the amount of your balance");
-                                        Console.ReadKey(); 
-                                    }
-                                    else
-                                    {    
-                                        p[x].Withdrawal(Math.Truncate(number2 * 100)/ 100);
-                                        Console.WriteLine($"You Withrawed $ {number2}");
-                                        Console.WriteLine($"Your Balance is $ {p[x].Balance}");
+                                        Console.WriteLine("Insufficient Funds");
+                                        Console.WriteLine("Press Any Key to Continue");
                                         Console.ReadKey();
-                                    }                                                                           
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Please Input numbers");
-                                    Console.WriteLine("Press Any Key to Continue");
-                                    Console.ReadKey();
-                                    continue;
-                                }
-                                break;
-                                
-                            case "3":
-                                Console.WriteLine($"Account Id : {p[x].AccountId}");                                 
-                                Console.WriteLine("Your Account Balance is $ {0:F2}", p[x].Balance);                                                       
-                                Console.WriteLine("Press Any Key to Continue");
-                                Console.ReadKey();
-                                break;
-
-                            case "4":
-                                bool inputDigitsOnly = true;
-                                Console.WriteLine("Please Input the 5-Digit Account Id of the reciever");                             
-                                bool accountIdNumberChecker = int.TryParse(Console.ReadLine(), out int transferAccountId);
-                                for(int y = 0; y <= index; y++)
-                                {         
-                                    if (accountIdNumberChecker)
-                                    {                                
-                                        if(p[y].AccountId == transferAccountId) // reciever
-                                        {
-                                            float number4;
-                                            Console.WriteLine("Enter Amount of Money You want to Send:");  
-                                            bool sendMoneyChecker = float.TryParse(Console.ReadLine(), out number4);
-                                            if(sendMoneyChecker)
-                                            {
-                                                if(p[x].Balance < number4 )//balance of sender
-                                                {
-                                                    Console.WriteLine("Insufficient Funds");
-                                                    Console.ReadKey();
-                                                    break;                                            
-                                                }else
-                                                {
-                                                    p[y].Balance += number4; //reciver
-                                                    p[x].Balance -= number4; //sender
-                                                    Console.WriteLine("Money Successfully sent");
-                                                    Console.WriteLine("Going back to the Log In Menu");
-                                                    Console.ReadKey();
-                                                    break;        
-                                                }                                              
-                                            }
-                                            else
-                                            {
-                                                inputDigitsOnly = false;
-                                                break;       
-                                            }                          
-                                        }else
-                                        {
-                                            inputDigitsOnly = false;
-                                        }                     
+                                        break;
                                     }
                                     else
                                     {
-                                        inputDigitsOnly = false;
-                                    } 
-                                }                                                                                                                              
-
-                                if(!inputDigitsOnly)
+                                        var moneyBalanceAfterTransfered = bank.TransferalOfMoneyReciever(reciever, number);
+                                        var moneyBalanceAfterTransfered2 = bank.TransferalOfMoneySender(account.Username, number);
+                                        Console.WriteLine("Money Successfully Sent");
+                                        Console.WriteLine($"Your Balance now is $ {bank.ShowBalance(account.Username)}");
+                                        Console.WriteLine("Press Any Key to Continue");
+                                        Console.ReadKey();
+                                    }
+                                }
+                                else
                                 {
-                                    Console.WriteLine("Please input digits only or Invalid Account Id.");
-                                    Console.WriteLine("Press Any Key to Continue");
-                                    Console.ReadKey();
-                                } 
-                                break;
+                                    TryParseNumberValidation();
+                                }
+                            }
+                            break;
 
-                            case "5":
-                                Console.WriteLine("Logging Out");
-                                Console.WriteLine("Press Any Key to Continue");
-                                Console.ReadKey();
-                                return;                               
+                        case "5":
+                            Console.WriteLine("Logging Out");
+                            Console.WriteLine("Press Any Key to Continue");
+                            Console.ReadKey();
+                            return;
 
-                            default:
-                                Console.WriteLine("Invalid Keyword. Please try again.");
-                                Console.ReadKey();
-                                break;
-                        }
+                        default:
+                            Console.WriteLine("Invalid Keyword. Please try again.");
+                            Console.ReadKey();
+                            break;
                     }
                 }
                 else
                 {
-                    notFound = true;
+                    Console.WriteLine("\nInvalid Username or Password, press any key to continue.");
+                    Console.ReadKey();
+                    break;
                 }
             }
+        }
 
-            if(notFound || index == -1)
-            {
-                Console.WriteLine("Invalid username or password. please try again");
-                Console.ReadKey();
-            }                   
+        public static void TryParseNumberValidation()
+        {
+            Console.WriteLine("Please Input numbers");
+            Console.WriteLine("Press Any Key to Continue");
+            Console.ReadKey();
         }
     }
 }
