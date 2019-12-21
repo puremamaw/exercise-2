@@ -29,23 +29,35 @@ namespace Task1
                         username = Console.ReadLine();
                         Console.WriteLine("Enter password:");
                         password = "";              
-                        var passwordMasked = bank.PasswordMasking(password);
+                        var passwordMasked = bank.PasswordMasking();
                         var account = bank.Login(username, passwordMasked);
                         UserLoginMainMenu(account);
                         break;
 
                     case "2":
-                        Console.Clear();
-                        Console.WriteLine("Registration of Account");
-                        Console.WriteLine("Enter username:");
-                        username = Console.ReadLine();
-                        Console.WriteLine("Enter password:");
-                        password = Console.ReadLine();
-                        var id = bank.Register(username, password);
-                        Console.WriteLine("Congratulations you have successfully registered.");
-                        Console.WriteLine($"Here is your Account Id. {id}");
-                        Console.WriteLine("Press Any Key to Continue.");
-                        Console.ReadKey();
+                        while(true)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Registration of Account");
+                            Console.WriteLine("Enter username:");
+                            username = Console.ReadLine();
+                            Console.WriteLine("Enter password:");
+                            password = bank.PasswordMasking();
+                            if(!bank.RegisterSuccess(username))
+                            {
+                                var id = bank.Register(username, password);
+                                Console.WriteLine("\nCongratulations you have successfully registered.");
+                                Console.WriteLine($"Here is your Account Id. {id}");
+                                Console.WriteLine("Press Any Key to Continue.");
+                                Console.ReadKey();
+                                break;
+                            }else
+                            {
+                                Console.WriteLine("\nUsername taken, Please try again.");
+                                Console.WriteLine("Press Any Key to Continue.");
+                                Console.ReadKey();
+                            }               
+                        }        
                         break;
 
                     case "3":
@@ -94,13 +106,13 @@ namespace Task1
                             isNumber = float.TryParse(Console.ReadLine(), out number);
                             if (isNumber)
                             {
-                                Console.WriteLine($"Number Deposited is $ {bank.Deposit(bank.NumberTrancate(number), account.Username)}");
+                                Console.WriteLine($"Number Deposited is $ {bank.Deposit(number, account.Username)}");
                                 Console.WriteLine($"Your Balance is $ {bank.ShowBalance(account.Username)}");
                                 Console.ReadKey();
                             }
                             else
                             {
-                                TryParseNumberValidation();
+                                ShowErrorMessage();
                                 continue;
                             }
                             break;
@@ -119,7 +131,7 @@ namespace Task1
                                 else
                                 {
                                     bank.Withdrawal(bank.NumberTrancate(number), account.Username);
-                                    Console.WriteLine($"You Withrawed $ {bank.NumberTrancate(number)}");
+                                    Console.WriteLine($"You Withrawed $ {number}");
                                     Console.WriteLine($"Your Balance now is $ {bank.ShowBalance(account.Username)}");
                                     Console.WriteLine("Press Any Key to Continue");
                                     Console.ReadKey();
@@ -127,7 +139,7 @@ namespace Task1
                             }
                             else
                             {
-                                TryParseNumberValidation();
+                                ShowErrorMessage();
                             }
                             break;
 
@@ -138,8 +150,8 @@ namespace Task1
                             break;
 
                         case "4":
-                            Console.WriteLine("Please Input the Name of the reciever");
-                            string reciever = Console.ReadLine();
+                            Console.WriteLine("Please Input the Id of the reciever");
+                            Guid reciever = Guid.Parse(Console.ReadLine());
                             var recieverFound = bank.SearchReciever(reciever);
                             if (recieverFound == null)
                             {
@@ -162,8 +174,8 @@ namespace Task1
                                     }
                                     else
                                     {
-                                        var moneyBalanceAfterTransfered = bank.TransferalOfMoneyReciever(reciever, bank.NumberTrancate(number));
-                                        var moneyBalanceAfterTransfered2 = bank.TransferalOfMoneySender(account.Username, bank.NumberTrancate(number));
+                                        var moneyBalanceAfterTransfered = bank.Deposit(bank.NumberTrancate(number), reciever);
+                                        var moneyBalanceAfterTransfered2 = bank.Withdrawal(bank.NumberTrancate(number), account.Username);
                                         Console.WriteLine("Money Successfully Sent");
                                         Console.WriteLine($"Your Balance now is $ {bank.ShowBalance(account.Username)}");
                                         Console.WriteLine("Press Any Key to Continue");
@@ -172,7 +184,7 @@ namespace Task1
                                 }
                                 else
                                 {
-                                    TryParseNumberValidation();
+                                    ShowErrorMessage();
                                 }
                             }
                             break;
@@ -198,7 +210,7 @@ namespace Task1
             }
         }
 
-        public static void TryParseNumberValidation()
+        public static void ShowErrorMessage()
         {
             Console.WriteLine("Please Input numbers");
             Console.WriteLine("Press Any Key to Continue");

@@ -4,7 +4,7 @@ class Bank
 {
     public string Name { get; set; }
 
-    public Account[] Accounts { get; private set; }
+    private Account[] Accounts { get; set; }
 
     private int TotalAccounts { get; set; } = 0;
 
@@ -43,11 +43,26 @@ class Bank
         return null;
     }
 
+    
+
     public float Deposit(float money, string username)
     {
         foreach (Account a in Accounts)
         {
             if (a.Username == username)
+            {
+                return a.Balance += money;
+            }
+        }
+        return 0;
+    }
+
+    //overload version used when sending money
+    public float Deposit(float money, Guid username)
+    {
+        foreach (Account a in Accounts)
+        {
+            if (a.AccountId == username)
             {
                 return a.Balance += money;
             }
@@ -61,7 +76,7 @@ class Bank
         {
             if (a.Username == username)
             {
-                return a.Balance;
+                return (float)Math.Truncate((a.Balance * 100)) / 100;
             }
         }
         return -1; //banks do not have negative balance
@@ -79,40 +94,16 @@ class Bank
         return 0;
     }
 
-    public Account SearchReciever(string username)
+    public Account SearchReciever(Guid username)
     {
         foreach (Account a in Accounts)
         {
-            if (a.Username == username)
+            if (a.AccountId == username)
             {
                 return a;
             }
         }
         return null;
-    }
-
-    public float TransferalOfMoneyReciever(string reciever, float money)
-    {
-        foreach (Account a in Accounts)
-        {
-            if (a.Username == reciever)
-            {
-                return a.Balance += money;
-            }
-        }
-        return 0;
-    }
-
-    public float TransferalOfMoneySender(string sender, float money)
-    {
-        foreach (Account a in Accounts)
-        {
-            if (a.Username == sender)
-            {
-                return a.Balance -= money;
-            }
-        }
-        return 0;
     }
 
     public Guid GetAccountId(string username)
@@ -127,10 +118,11 @@ class Bank
         return Guid.Empty;
     }
 
-    public string PasswordMasking(string password)
+    public string PasswordMasking()
     {
+        string password = string.Empty;
         do
-        {
+        {       
             ConsoleKeyInfo key = Console.ReadKey(true);
             if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)
             {
@@ -150,12 +142,24 @@ class Bank
                 }
             }
         } while (true);
-        
+
         return password;
     }
 
     public float NumberTrancate(float number)
     {
         return (float)Math.Truncate((number * 100)) / 100;
+    }
+
+    public bool RegisterSuccess(string username)
+    {
+        foreach (Account a in Accounts)
+        {
+            if (a.Username == username)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
