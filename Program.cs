@@ -10,6 +10,7 @@ namespace Task1
             bool shouldContinue = true;
             string username = string.Empty;
             string password = string.Empty;
+            string n = string.Empty;
 
             while (shouldContinue)
             {
